@@ -1,0 +1,2 @@
+# SMALL VEHICLE CAPACITY	Speed ratio small vs large	Time horizon	TW width	service duration
+400	2	32400	7200	300	
