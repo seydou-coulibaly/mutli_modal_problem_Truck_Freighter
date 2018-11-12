@@ -9,12 +9,12 @@ function loadParametre()
     head = split(head)
     # println(head)
     Q = parse(Float64,head[1])
-    ALPHA = parse(Float64,head[2])
+    alpha = parse(Float64,head[2])
     T = parse(Float64,head[3])
-    W = parse(Float64,head[4])
-    S = parse(Float64,head[5])
-    println("$Q, $ALPHA, $T, $W, $S")
-    return Q,ALPHA,T,W,S
+    width = parse(Float64,head[4])
+    s = parse(Float64,head[5])
+    # println("$Q, $alpha, $T, $width, $s")
+    return Q,alpha,T,width,s
 end
 function loadInstance(fname)
     fname = "instances2018/"*fname
@@ -23,112 +23,79 @@ function loadInstance(fname)
     # Vset = Set{Int}() push!(Vset, parse(Int,pointeurLine[1]))
     # Jset = Set{Int}()
     # Pset = Set{Int}()
-
-    temp = zeros(0,2)
+    nodes = Int[]
     V = Int[]
     J = Int[]
+    Jls = Int[]
     Js = Int[]
     Jl = Int[]
     P = Int[]
     # fill!(tableau, 42)
-    latitudeDepot = longitudeDepot = 0
-    latitudeParking  = Float64[]
-    longitudeParking = Float64[]
-    latitudeCs  = Float64[]
-    longitudeCs = Float64[]
-    qs   = Float64[]
-    as = Float64[]
-    latitudeCl  = Float64[]
-    longitudeCl = Float64[]
-    ql = Float64[]
-    al = Float64[]
-
-
-    i = 1
+    latitude  = Float64[]
+    longitude = Float64[]
+    q  = Float64[]
+    a  = Float64[]
+    indice = 1
     for line in eachline(f)
         pointeurLine = split(line)
-        temp = vcat(temp, reshape([i, parse(Float64, pointeurLine[1])],(:,2)))
-        i += 1
-    end
-    close(f)
-    f = open(fname)
-    line = readline(f)
-
-
-    for line in eachline(f)
-        pointeurLine = split(line)
+        # ajouter indice dans nodes et dans V
+        push!(nodes, parse(Int, pointeurLine[1]))
+        push!(V,indice)
         if pointeurLine[3] == "D"
             # Depot, ce bloc est executé une seule fois par instance
-            push!(V, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            latitudeDepot = parse(Float64,pointeurLine[4])
-            longitudeDepot = parse(Float64,pointeurLine[5])
+            push!(latitude ,parse(Float64,pointeurLine[4]))
+            push!(longitude,parse(Float64,pointeurLine[5]))
         elseif pointeurLine[3] == "P"
             # Parking
-            push!(V, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(P, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(latitudeParking ,parse(Float64,pointeurLine[4]))
-            push!(longitudeParking,parse(Float64,pointeurLine[5]))
+            push!(P,indice)
+            push!(latitude ,parse(Float64,pointeurLine[4]))
+            push!(longitude,parse(Float64,pointeurLine[5]))
         elseif pointeurLine[3] == "L"
-            # Clients
-            push!(V, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(J, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(Jl, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(ql,parse(Float64,pointeurLine[2]))
-            push!(latitudeCl ,parse(Float64,pointeurLine[4]))
-            push!(longitudeCl,parse(Float64,pointeurLine[5]))
-            push!(al,parse(Float64,pointeurLine[6]))
+            # Clients deliver by long truck
+            push!(J,indice)
+            push!(Jl,indice)
+            push!(q,parse(Float64,pointeurLine[2]))
+            push!(latitude ,parse(Float64,pointeurLine[4]))
+            push!(longitude,parse(Float64,pointeurLine[5]))
+            push!(a,parse(Float64,pointeurLine[6]))
         elseif pointeurLine[3] == "LS"
-            # Clients
-            push!(V, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(J, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(Js, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(Jl, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(ql,parse(Float64,pointeurLine[2]))
-            push!(latitudeCl ,parse(Float64,pointeurLine[4]))
-            push!(longitudeCl,parse(Float64,pointeurLine[5]))
-            push!(al,parse(Float64,pointeurLine[6]))
-            push!(qs,parse(Float64,pointeurLine[2]))
-            push!(latitudeCs ,parse(Float64,pointeurLine[4]))
-            push!(longitudeCs,parse(Float64,pointeurLine[5]))
-            push!(as,parse(Float64,pointeurLine[6]))
-
+            # Clients deliver by big or small truck
+            push!(J,indice)
+            push!(Jls,indice)
+            push!(q,parse(Float64,pointeurLine[2]))
+            push!(latitude ,parse(Float64,pointeurLine[4]))
+            push!(longitude,parse(Float64,pointeurLine[5]))
+            push!(a,parse(Float64,pointeurLine[6]))
         else
-            # Clients
-            push!(V, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(J, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(Js, findfirst(temp[:,2], parse(Float64, pointeurLine[1])))
-            push!(qs,parse(Float64,pointeurLine[2]))
-            push!(latitudeCs ,parse(Float64,pointeurLine[4]))
-            push!(longitudeCs,parse(Float64,pointeurLine[5]))
-            push!(as,parse(Float64,pointeurLine[6]))
+            # Clients deliver by small truck
+            push!(J,indice)
+            push!(Js,indice)
+            push!(q,parse(Float64,pointeurLine[2]))
+            push!(latitude ,parse(Float64,pointeurLine[4]))
+            push!(longitude,parse(Float64,pointeurLine[5]))
+            push!(a,parse(Float64,pointeurLine[6]))
 
         end
+        indice = indice + 1
     end
+    # ajout du sommet n+1 (dupliquer le sommet 0)
+    push!(V,indice)
+    push!(nodes,nodes[1])
     # Vset = union(Vset,Pset)
     println("\n ************* Data : *************")
-    println("temp: ", temp)
     println("V : $V")
     println("P : $P")
     println("J : $J")
     println("Js : $Js")
     println("Jl : $Jl")
-    println("Latitude Depot  : \n $latitudeDepot")
-    println("Longitude Depot : \n $longitudeDepot")
-
-    println("Latitude Parking  : \n $latitudeParking")
-    println("Longitude Parking : \n $longitudeParking")
-
-    println("Demande stisfies by big truck  : \n $ql")
-    println("Latitude doing by big truck  : \n $latitudeCl")
-    println("Longitude doing by big truck : \n $longitudeCl")
-    println("Time window by big truck : \n $al")
-
-    println("Demande stisfies by Small truck : \n $qs")
-    println("Latitude doing by Small truck  : \n $latitudeCs")
-    println("Longitude doing by Small truck : \n $longitudeCs")
-    println("Time window by Small truck : \n $as")
+    println("Jls : $Jls")
+    println("nodes : $nodes")
+    println("Latitude Depot  : \n $latitude")
+    println("Longitude Depot : \n $longitude")
+    println("Demande : \n $q")
+    println("Time window aj : \n $a")
     close(f)
-    return V,P,J,Js,Jl,latitudeDepot,longitudeDepot,latitudeParking,longitudeParking,ql,latitudeCl,longitudeCl,al,qs,latitudeCs,longitudeCs,as
+    return V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a
 end
 function loadMatriceCost()
     f = open("instances2018/distancematrix98.txt")
@@ -149,8 +116,20 @@ function loadMatriceCost()
 end
 
 function loadData(fname)
-    Q,ALPHA,T,W,S = loadParametre()
-    V,P,J,Js,Jl,latitudeDepot,longitudeDepot,latitudeParking,longitudeParking,ql,latitudeCl,longitudeCl,al,qs,latitudeCs,longitudeCs,as = loadInstance(fname)
+    Q,alpha,T,width,s = loadParametre()
+    V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a = loadInstance(fname)
     cout = loadMatriceCost()
-    return Q,ALPHA,T,W,S,V,P,J,Js,Jl,latitudeDepot,longitudeDepot,latitudeParking,longitudeParking,ql,latitudeCl,longitudeCl,al,qs,latitudeCs,longitudeCs,as,cout
+    return Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout
+end
+function affichageMatrice(matrice)
+    n,m = size(matrice)
+    for i = 1:n
+        # print("i = $i")
+        print("\t")
+        for j= 1:m
+            print(matrice[i,j])
+            print("\t")
+        end
+        println()
+    end
 end

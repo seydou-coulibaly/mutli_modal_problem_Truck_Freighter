@@ -1,56 +1,63 @@
 # =========================================================================== #
-function setmodel(solverSelected, Q, ALPHA, T, W, S, V, P, J, Js, Jl, latitudeDepot, longitudeDepot, latitudeParking, longitudeParking, ql, latitudeCl, longitudeCl, al, qs, latitudeCs, longitudeCs, as, cout)
+function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
+    n = length(V)
+    m = length(P)
+    ip = Model(solver=solverSelected)
+    #Variables definitions
+    @variable(ip, Xs[1:n,1:n],Bin)
+    @variable(ip, Xb[1:n,1:n],Bin)
+    @variable(ip, 0 <= ws[1:n] <= T)
+    @variable(ip, 0 <= wbi[1:n] <= T)
+    @variable(ip, 0 <= wbo[1:m] <= T)
+    @variable(ip, 0 <= u[1:n] <= Q)
 
-#  pUj = vcat(P[1],J[])
-#  n = length(pUj)
-n = length(V)
+    #Objectives functions
+    @objective(ip, Min, sum(cout[nodes[i],nodes[j]]*(Xb[i,j] + alpha*Xs[i,j]) for i in V, j in V))
 
-  ip = Model(solver=solverSelected)
-  #Variables definitions
-  @variable(ip, Xs[1:n+1,1:n+1],Bin)
-  @variable(ip, Xb[1:n+1,1:n+1],Bin)
-  @variable(ip, Xr[1:n+1,1:n+1],Bin)
-  @variable(ip, ws[1:n+1] >= 0)
-  @variable(ip, wb[1:n+1] >= 0)
-  @variable(ip, u[1:n+1] >= 0)
+    #Constraints of problem
+    # constraint1 : Visit all customers
+    @constraint(ip,[i in Jls], sum(Xs[i,j] for j in V) + sum(Xb[i,j] for j in V) >= 1)
+    @constraint(ip,[i in Js], sum(Xs[i,j] for j in V) == 1)
+    @constraint(ip,[i in Jl], sum(Xb[i,j] for j in V) == 1)
+    @constraint(ip,[i in V], Xb[i,i] == 0)
+    @constraint(ip,[i in V], Xs[i,i] == 0)
+    # Ne peut pas etre livre à la fois par small et big truck
+    @constraint(ip,[i in V, j in V], Xs[i,j] + Xb[i,j] <= 1)
+    # constraint2 : Flow conservation
+    # 1) cas où i in J
+    @constraint(ip,[i in J], sum(Xb[i,j] for j in V) == sum(Xb[j,i] for j in V))
+    @constraint(ip,[i in J], sum(Xs[i,j] for j in V) == sum(Xs[j,i] for j in V))
+    # 2) cas où i in P
+    @constraint(ip,[i in P], sum(Xb[i,j] for j in V) == sum(Xb[j,i] for j in V))
+    @constraint(ip, sum(Xs[i,j] for i in V, j in P) == sum(Xs[j,i] for i in V, j in P))
+    # 2) cas sur le depot
+    @constraint(ip, sum(Xb[1,i] for i in union(J,P)) == sum(Xb[i,n] for i in union(J,P)))
+    @constraint(ip, sum(Xb[1,i] for i in union(J,P)) == 1)
+    @constraint(ip, sum(Xs[1,i] for i in union(J,P)) == sum(Xs[i,n] for i in  union(J,P)))
+    @constraint(ip, sum(Xs[1,i] for i in union(J,P)) == 0)
+    # constraint  3 : fenetre de temps
+    @constraint(ip,[i in V, j in V], ws[i] + s + alpha*cout[nodes[i],nodes[j]] <= ws[j] + (1-Xs[i,j])*T)
+    @constraint(ip,[i in V, j in V], wbi[i] + s + alpha*cout[nodes[i],nodes[j]] <= wbi[j] + (1-Xb[i,j])*T)
+    # constraint 4 :
+    @constraint(ip,[i in J, j in J], u[j] <= u[i] - q[findfirst(J,i)] + (1-Xs[i,j])*Q)
+    @constraint(ip,[j in P], u[j] == Q)
 
-  #Objectives functions
-  @objective(ip, Max, sum(cout[i,j]*(Xb[i,j] + ALPHA*Xs[i,j] - Xr[i,j]) for i=1:n+1, j=1:n+1))
-  #Constraints of problem
-  @constraint(ip, cte1[i in Js[:,1]], sum(Xs[i,j] for j in V[:,1]) == 1) # constraint 1
-  @constraint(ip, cte2[i in Jl[:,1]], sum(Xb[i,j] for j in V[:,1]) == 1)
+    # bloc de constraint  5
+    @constraint(ip,[i in union(J,P)], ws[i] <= ws[n])
+    @constraint(ip,[i in union(J,P)], wbi[i] <= wbi[n])
+    @constraint(ip,[i in union(J,P)], ws[1] <= ws[i])
+    @constraint(ip,[i in union(J,P)], wbi[1] <= wbi[i])
+    @constraint(ip,wbi[1] == ws[n])
 
-  @constraint(ip, cte3[j in J], sum(Xs[i,j] for i in V[1]) == sum(Xs[j,i] for i in V[1])) # constraint 2
-  @constraint(ip, cte4[j in J], sum(Xb[i,j] for i in V[1]) == sum(Xb[j,i] for i in V[1]))
+    # bloc de constraint  6
+    @constraint(ip,[i in union(Js,Jls)], a[findfirst(J,i)] <= ws[i])
+    @constraint(ip,[i in union(Jl,Jls)], a[findfirst(J,i)] <= wbi[i])
 
-  @constraint(ip, sum(Xs[1,i] for i in V) == sum(Xs[i,n+1] for i in V[:,1])) # constraint 3
-  @constraint(ip, sum(Xb[1,i] for i in V) == sum(Xb[i,n+1] for i in V[:,1]))
-  @constraint(ip, sum(Xs[1,i] for i in V) == 1)
-  @constraint(ip, sum(Xb[1,i] for i in V) == 1)
+    # constraint 7 : attente client / parking
+    @constraint(ip,[i=1:m], wbo[i] >= wbi[P[i]])
 
-  @constraint(ip, cte5[i in Js, j in Js], ws[i] + S + ALPHA*cout[i,j] - ws[j] <= (1-Xs[i,j]* max( ((as[findfirst(Js,i)]) + W + S + cout[i,j] - as[findfirst(Js,j)]), 0))) # constraint 4
-  @constraint(ip, cte6[i in Jl, j in Jl], wb[i] + S + ALPHA*cout[i,j] - wb[j] <= (1-Xb[i,j]* max( ((al[findfirst(Jl,i)]) + W + S + cout[i,j] - al[findfirst(Jl,j)]), 0)))
-
-  @constraint(ip, cte7[i in Js, j in Js], u[j] <= u[i] - qs[findfirst(Js,i)] + (1-Xs[i,j])*Q) # constraint 5
-
-  @constraint(ip, cte8[i in J], ws[i] <= ws[n+1]) # constraint 6
-  @constraint(ip, cte9[i in J], wb[i] <= wb[n+1])
-
-  @constraint(ip, cte10[i in Js], 0 <= u[i]) # constraint 7
-  @constraint(ip, cte11[i in Js], u[i] <= Q)
-
-  @constraint(ip, cte12[i in Js], ws[i] <= (as[findfirst(Js,i)] + W)) # constraint 8
-  @constraint(ip, cte13[i in Js], ws[i] >= (as[findfirst(Js,i)]))
-  @constraint(ip, cte14[i in Jl], wb[i] <= (al[findfirst(Jl,i)] + W))
-  @constraint(ip, cte15[i in Jl], wb[i] >= (al[findfirst(Jl,i)]))
-
-  @constraint(ip, cte16[i in Js, j in P], u[j] <= Q - qs[findfirst(Js,i)] + (1-Xs[i,j])*qs[findfirst(Js,i)]) # constraint 9
-
-  # contrainte de relais @constraint(ip, ) # constraint 10
-
-  @constraint(ip, cte18[i in Js, j in P], Xr[i,j] >= Xs[i,j] + Xb[i,j] - 1) # constraint 11
+    # @constraint(ip,[i in P],wbi[i] == ws[i])
 
 
-
-  return ip, Xb, Xs, Xr
+    return ip, Xb, Xs, ws, wbi, wbo, u
 end
