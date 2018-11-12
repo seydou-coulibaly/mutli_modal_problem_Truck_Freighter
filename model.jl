@@ -14,14 +14,13 @@ function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitud
     #Objectives functions
     @objective(ip, Min, sum(cout[nodes[i],nodes[j]]*(Xb[i,j] + alpha*Xs[i,j]) for i in V, j in V))
 
-    #Constraints of problem
+    # Constraints of problem
     # constraint1 : Visit all customers
     @constraint(ip,[i in Jls], sum(Xs[i,j] for j in V) + sum(Xb[i,j] for j in V) >= 1)
     @constraint(ip,[i in Js], sum(Xs[i,j] for j in V) == 1)
     @constraint(ip,[i in Jl], sum(Xb[i,j] for j in V) == 1)
     @constraint(ip,[i in V], Xb[i,i] == 0)
     @constraint(ip,[i in V], Xs[i,i] == 0)
-    # Ne peut pas etre livre à la fois par small et big truck
     @constraint(ip,[i in V, j in V], Xs[i,j] + Xb[i,j] <= 1)
     # constraint2 : Flow conservation
     # 1) cas où i in J
@@ -36,7 +35,7 @@ function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitud
     @constraint(ip, sum(Xs[1,i] for i in union(J,P)) == sum(Xs[i,n] for i in  union(J,P)))
     @constraint(ip, sum(Xs[1,i] for i in union(J,P)) == 0)
     # constraint  3 : fenetre de temps
-    @constraint(ip,[i in V, j in V], ws[i] + s + alpha*cout[nodes[i],nodes[j]] <= ws[j] + (1-Xs[i,j])*T)
+    @constraint(ip,[i in union(J,P), j in J], ws[i] + s + alpha*cout[nodes[i],nodes[j]] <= ws[j] + (1-Xs[i,j])*T)
     @constraint(ip,[i in V, j in V], wbi[i] + s + alpha*cout[nodes[i],nodes[j]] <= wbi[j] + (1-Xb[i,j])*T)
     # constraint 4 :
     @constraint(ip,[i in J, j in J], u[j] <= u[i] - q[findfirst(J,i)] + (1-Xs[i,j])*Q)
@@ -47,7 +46,8 @@ function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitud
     @constraint(ip,[i in union(J,P)], wbi[i] <= wbi[n])
     @constraint(ip,[i in union(J,P)], ws[1] <= ws[i])
     @constraint(ip,[i in union(J,P)], wbi[1] <= wbi[i])
-    @constraint(ip,wbi[1] == ws[n])
+    @constraint(ip,wbi[n] == ws[n])
+    @constraint(ip,wbi[1] == ws[1])
 
     # bloc de constraint  6
     @constraint(ip,[i in union(Js,Jls)], a[findfirst(J,i)] <= ws[i])

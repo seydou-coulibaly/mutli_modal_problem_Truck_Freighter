@@ -11,7 +11,7 @@ solverSelectedCPLEX = CplexSolver()
 # ------------------------------------------------------------------------------
 fname = "C1-2-8.txt"
 Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout = loadData(fname)
-ip, Xb, Xs, ws, wbi, wbo, u = setmodel(solverSelectedCPLEX,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
+ip, Xb, Xs, ws, wbi, wbo, u = setmodel(solverSelectedGLPK,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
 println("The optimization problem to be solved is:")
 print(ip)
 println("Solving...");
