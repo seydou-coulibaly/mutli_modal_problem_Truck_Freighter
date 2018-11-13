@@ -34,4 +34,43 @@ if status == :Optimal
   print("u = \t");println(u)
   print("wbo = \t");println(wbo)
   println("z  = ", getobjectivevalue(ip))
+  #--------------------------------------------------------------------------------
+  # f = open("smallFreight.txt", "w");
+  #  # for i = 1:length(yn[:,1])
+  #  #     x1  = yn[i,indV1]
+  #  #     x2  = yn[i,indV2]
+  #  #     f1  = yn[i,indF1]
+  #  #     f2  = yn[i,indF2]
+  #  #     write(f,"$i \t $x1 \t $x2 \t $f1 \t $f2\n");
+  #  # end
+  #  close(f);
+  #  f = open("bigTruck.txt", "w");
+  #   # for i = 1:length(yn[:,1])
+  #   #     x1  = yn[i,indV1]
+  #   #     x2  = yn[i,indV2]
+  #   #     f1  = yn[i,indF1]
+  #   #     f2  = yn[i,indF2]
+  #   #     write(f,"$i \t $x1 \t $x2 \t $f1 \t $f2\n");
+  #   # end
+  #   close(f);
+  #   f = open("parking.txt", "w");
+  #    # for i = 1:length(yn[:,1])
+  #    #     x1  = yn[i,indV1]
+  #    #     x2  = yn[i,indV2]
+  #    #     f1  = yn[i,indF1]
+  #    #     f2  = yn[i,indF2]
+  #    #     write(f,"$i \t $x1 \t $x2 \t $f1 \t $f2\n");
+  #    # end
+  #    close(f);
 end
+# function listparcours(X)
+#     n,m = size(X)
+#     indice = 1
+#     cond = 0
+#     j = 1
+#     while j < n
+#         if 1 in X[i,:]
+#             # cond = true et retourner indice
+#         end
+#     end
+# end

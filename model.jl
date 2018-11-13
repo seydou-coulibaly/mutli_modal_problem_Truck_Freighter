@@ -8,6 +8,7 @@ function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitud
     @variable(ip, Xb[1:n,1:n],Bin)
     @variable(ip, 0 <= ws[1:n] <= T)
     @variable(ip, 0 <= wbi[1:n] <= T)
+
     @variable(ip, 0 <= wbo[1:m] <= T)
     @variable(ip, 0 <= u[1:n] <= Q)
 
@@ -35,7 +36,7 @@ function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitud
     @constraint(ip, sum(Xs[1,i] for i in union(J,P)) == sum(Xs[i,n] for i in  union(J,P)))
     @constraint(ip, sum(Xs[1,i] for i in union(J,P)) == 0)
     # constraint  3 : fenetre de temps
-    @constraint(ip,[i in V, j in J], ws[i] + s + alpha*cout[nodes[i],nodes[j]] <= ws[j] + (1-Xs[i,j])*T)
+    @constraint(ip,[i in V, j in V], ws[i] + s + alpha*cout[nodes[i],nodes[j]] <= ws[j] + (1-Xs[i,j])*T)
     @constraint(ip,[i in V, j in V], wbi[i] + s + alpha*cout[nodes[i],nodes[j]] <= wbi[j] + (1-Xb[i,j])*T)
 
     # Ajout de la fenetre de temps sur wbo
