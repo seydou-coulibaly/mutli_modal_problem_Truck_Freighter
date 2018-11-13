@@ -35,10 +35,10 @@ function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitud
     @constraint(ip, sum(Xs[1,i] for i in union(J,P)) == sum(Xs[i,n] for i in  union(J,P)))
     @constraint(ip, sum(Xs[1,i] for i in union(J,P)) == 0)
     # constraint  3 : fenetre de temps
-    @constraint(ip,[i in V, j in V], ws[i] + s + alpha*cout[nodes[i],nodes[j]] <= ws[j] + (1-Xs[i,j])*T)
-    # on considère que le cas où le depot n'est servis que par un seul j
+    @constraint(ip,[i in V, j in J], ws[i] + s + alpha*cout[nodes[i],nodes[j]] <= ws[j] + (1-Xs[i,j])*T)
     @constraint(ip,[i in V, j in V], wbi[i] + s + alpha*cout[nodes[i],nodes[j]] <= wbi[j] + (1-Xb[i,j])*T)
 
+    # Ajout de la fenetre de temps sur wbo
     @constraint(ip,[i=1:m, j in V], wbo[i] <= ws[j] + (1-Xs[P[i],j])*T)
     @constraint(ip,[i=1:m, j in V], wbo[i] <= wbi[j] + (1-Xb[P[i],j])*T)
     # constraint 4 :
@@ -61,6 +61,7 @@ function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitud
     @constraint(ip,[i=1:m], wbo[i] >= ws[P[i]])
     @constraint(ip,[i=1:m], wbo[i] >= wbi[P[i]])
     @constraint(ip,[i=1:m, j in J], T*(1-Xs[P[i],j]) + wbo[i] >= ws[j] - alpha*cout[nodes[P[i]],nodes[j]])
+    # @constraint(ip,[i=1:m, j in J], wbi[i] <= ws[j] - alpha*cout[nodes[P[i]],nodes[j]] + T*(1-Xs[P[i],j])) # review
     # constraint 8 : si small truck au parking alors forcement big truck est active sur une ligne
     @constraint(ip,[i in P], sum(Xs[i,j] for j in V) <= sum(Xb[i,j] for j in V))
     @constraint(ip,[j in P], sum(Xs[i,j] for i in V) <= sum(Xb[i,j] for i in V))
