@@ -8,7 +8,6 @@ function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitud
     @variable(ip, Xb[1:n,1:n],Bin)
     @variable(ip, 0 <= ws[1:n] <= T)
     @variable(ip, 0 <= wbi[1:n] <= T)
-
     @variable(ip, 0 <= wbo[1:m] <= T)
     @variable(ip, 0 <= u[1:n] <= Q)
 

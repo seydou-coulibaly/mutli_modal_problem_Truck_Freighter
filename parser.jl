@@ -133,3 +133,71 @@ function affichageMatrice(matrice)
         println()
     end
 end
+function noeudDepart(X)
+    n,m = size(X)
+    retour = 0
+    ligne = 1
+    while ligne < n
+        if findfirst(X[ligne,:], 1) != 0
+            return ligne
+        else
+            ligne += 1
+        end
+    end
+    return retour
+end
+
+function listparcours(X)
+    ordre = Int[]
+    i = noeudDepart(X)
+    push!(ordre, i)
+    while  findfirst(X[i,:], 1) != 0
+        push!(ordre, findfirst(X[i,:], 1))
+        i = findfirst(X[i,:], 1)
+    end
+    return ordre
+end
+function genSol(X,fname,num)
+    instanceName = "instances2018/"*fname
+    if num == 1
+        f = open("log/S-"*fname, "w");
+    else
+        f = open("log/B-"*fname, "w");
+    end
+    finstance = open(instanceName, "r");
+    line = readline(finstance)
+    write(f,line*"\n");
+    close(finstance);
+     for i = 1:length(X)
+         finstance = open(instanceName, "r");
+         line = readline(finstance)
+         # println(line)
+         ind = 1
+         while ind != X[i]+1
+             # load la ligne
+             line = readline(finstance)
+             # println(line)
+             ind = ind + 1
+         end
+         # line = readline(finstance)
+         println(line)
+         # line = readline(finstance)
+         write(f,line*"\n");
+         close(finstance);
+     end
+     close(f);
+end
+function formaterSol(X)
+    n,m = size(X)
+    solution = X
+    for i = 1:n
+        for j = 1:m
+            if(X[i,j] == 0)
+                solution[i,j] = 0
+            else
+                solution[i,j] = 1
+            end
+        end
+    end
+    return solution
+end

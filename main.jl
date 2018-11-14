@@ -9,9 +9,12 @@ solverSelectedCPLEX = CplexSolver()
 # ------------------------------------------------------------------------------
 #                     MAIN
 # ------------------------------------------------------------------------------
-fname = "C1-2-8.txt"
+# fname = "C1-2-8.txt"
+# fname = "R2-3-12.txt"
+# ifeasible R1-2-8,
+fname  = "instanceNantes.txt"
 Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout = loadData(fname)
-ip, Xb, Xs, ws, wbi, wbo, u = setmodel(solverSelectedGLPK,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
+ip, Xb, Xs, ws, wbi, wbo, u = setmodel(solverSelectedCPLEX,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
 println("The optimization problem to be solved is:")
 print(ip)
 println("Solving...");
@@ -34,43 +37,33 @@ if status == :Optimal
   print("u = \t");println(u)
   print("wbo = \t");println(wbo)
   println("z  = ", getobjectivevalue(ip))
+  # passageXb = nodes[listparcours(xb)]
+  # passageXs = nodes[listparcours(xs)]
+  println("Formattage de solution : necessaire avec CPLEX")
+  xs = formaterSol(xs)
+  xb = formaterSol(xb)
+
+  affichageMatrice(xb)
+  println()
+  affichageMatrice(xs)
+
+  passageXb = listparcours(xb)
+  passageXs = listparcours(xs)
+  println("Ordre de passage big truck")
+  println(passageXb)
+  println(nodes[passageXb])
+  println()
+  println("Ordre de passage small Freight")
+  println(passageXs)
+  println(nodes[passageXs])
   #--------------------------------------------------------------------------------
-  # f = open("smallFreight.txt", "w");
-  #  # for i = 1:length(yn[:,1])
-  #  #     x1  = yn[i,indV1]
-  #  #     x2  = yn[i,indV2]
-  #  #     f1  = yn[i,indF1]
-  #  #     f2  = yn[i,indF2]
-  #  #     write(f,"$i \t $x1 \t $x2 \t $f1 \t $f2\n");
-  #  # end
-  #  close(f);
-  #  f = open("bigTruck.txt", "w");
-  #   # for i = 1:length(yn[:,1])
-  #   #     x1  = yn[i,indV1]
-  #   #     x2  = yn[i,indV2]
-  #   #     f1  = yn[i,indF1]
-  #   #     f2  = yn[i,indF2]
-  #   #     write(f,"$i \t $x1 \t $x2 \t $f1 \t $f2\n");
-  #   # end
-  #   close(f);
-  #   f = open("parking.txt", "w");
-  #    # for i = 1:length(yn[:,1])
-  #    #     x1  = yn[i,indV1]
-  #    #     x2  = yn[i,indV2]
-  #    #     f1  = yn[i,indF1]
-  #    #     f2  = yn[i,indF2]
-  #    #     write(f,"$i \t $x1 \t $x2 \t $f1 \t $f2\n");
-  #    # end
-  #    close(f);
+  println("------------------------------------------------------------------")
+  if passageXb[end] == length(V)
+      passageXb[end] = passageXb[1]
+  end
+  # println(passageXb)
+  genSol(passageXs,fname,1)
+  println()
+  genSol(passageXb,fname,2)
 end
-# function listparcours(X)
-#     n,m = size(X)
-#     indice = 1
-#     cond = 0
-#     j = 1
-#     while j < n
-#         if 1 in X[i,:]
-#             # cond = true et retourner indice
-#         end
-#     end
-# end
+#
