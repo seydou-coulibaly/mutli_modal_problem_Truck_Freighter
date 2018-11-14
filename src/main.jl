@@ -6,15 +6,16 @@ include("parser.jl")
 # Proceeding to the optimization
 solverSelectedGLPK = GLPKSolverMIP()
 solverSelectedCPLEX = CplexSolver()
+solverSelected = solverSelectedCPLEX
 # ------------------------------------------------------------------------------
 #                     MAIN
 # ------------------------------------------------------------------------------
 # fname = "C1-2-8.txt"
-# fname = "R2-3-12.txt"
+fname = "R2-3-12.txt"
 # ifeasible R1-2-8,
-fname  = "instanceNantes.txt"
+#fname  = "instanceNantes.txt"
 Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout = loadData(fname)
-ip, Xb, Xs, ws, wbi, wbo, u = setmodel(solverSelectedCPLEX,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
+ip, Xb, Xs, ws, wbi, wbo, u = setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
 println("The optimization problem to be solved is:")
 print(ip)
 println("Solving...");
@@ -39,9 +40,11 @@ if status == :Optimal
   println("z  = ", getobjectivevalue(ip))
   # passageXb = nodes[listparcours(xb)]
   # passageXs = nodes[listparcours(xs)]
-  println("Formattage de solution : necessaire avec CPLEX")
-  xs = formaterSol(xs)
-  xb = formaterSol(xb)
+  if solverSelected == solverSelectedCPLEX
+      println("Formattage de solution : necessaire avec CPLEX")
+      xs = formaterSol(xs)
+      xb = formaterSol(xb)
+  end
 
   affichageMatrice(xb)
   println()
@@ -50,11 +53,10 @@ if status == :Optimal
   passageXb = listparcours(xb)
   passageXs = listparcours(xs)
   println("Ordre de passage big truck")
-  println(passageXb)
+  # print(passageXb);print(" \t correspond aux noeuds \t");
   println(nodes[passageXb])
-  println()
-  println("Ordre de passage small Freight")
-  println(passageXs)
+  println("\nOrdre de passage small Freight")
+  # print(passageXs);print(" \t correspond aux noeuds \t");
   println(nodes[passageXs])
   #--------------------------------------------------------------------------------
   println("------------------------------------------------------------------")

@@ -1,0 +1,16 @@
+Below a zip file which includes the documents needed for the truck-and-freighter project:
+
+    A statement - note that this is a draft, the problem is mostly discussed in class.
+    The tex source of the statement
+    12 instances ranging from 8 to 12 customers
+    One large instance file which should be the base for smaller instances if needed
+    One time matrix from OSRM... note that the respect of triangular inequalities on this matrix is not guaranteed
+
+Expected work to be returned: code + report
+
+
+Deadline: November the 16th 2018
+
+Some bibliography to start with:
+
+http://www.sciencedirect.com/science/article/pii/S037722171730930X

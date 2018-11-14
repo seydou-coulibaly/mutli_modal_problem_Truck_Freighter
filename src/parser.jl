@@ -1,6 +1,6 @@
 function loadParametre()
     head = ""
-    f = open("instances2018/parameters.txt")
+    f = open("../instances2018/parameters.txt")
     for line in eachline(f)
         # println("$(length(line)), $(line)")
         head = line
@@ -17,7 +17,7 @@ function loadParametre()
     return Q,alpha,T,width,s
 end
 function loadInstance(fname)
-    fname = "instances2018/"*fname
+    fname = "../instances2018/"*fname
     f = open(fname)
     line = readline(f)
     # Vset = Set{Int}() push!(Vset, parse(Int,pointeurLine[1]))
@@ -98,7 +98,7 @@ function loadInstance(fname)
     return V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a
 end
 function loadMatriceCost()
-    f = open("instances2018/distancematrix98.txt")
+    f = open("../instances2018/distancematrix98.txt")
     coutLine = Float64[]
     cout = zeros(0,98) # 98 est la taille en colonne de ma matrice de cout
     for line in eachline(f)
@@ -158,11 +158,11 @@ function listparcours(X)
     return ordre
 end
 function genSol(X,fname,num)
-    instanceName = "instances2018/"*fname
+    instanceName = "../instances2018/"*fname
     if num == 1
-        f = open("log/S-"*fname, "w");
+        f = open("../log/S-"*fname, "w");
     else
-        f = open("log/B-"*fname, "w");
+        f = open("../log/B-"*fname, "w");
     end
     finstance = open(instanceName, "r");
     line = readline(finstance)
