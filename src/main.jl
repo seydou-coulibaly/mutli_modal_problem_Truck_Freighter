@@ -1,17 +1,31 @@
 
 # Using the following packages
-using JuMP, GLPKMathProgInterface, CPLEX
+using JuMP, GLPKMathProgInterface, CPLEX, Gurobi, Cbc
 include("model.jl")
 include("parser.jl")
 # Proceeding to the optimization
 solverSelectedGLPK = GLPKSolverMIP()
 solverSelectedCPLEX = CplexSolver()
-solverSelected = solverSelectedCPLEX
+solverSelectedCbc = CbcSolver()
+solverSelectedGurobi = GurobiSolver()
+solverSelected = solverSelectedGurobi
 # ------------------------------------------------------------------------------
 #                     MAIN
 # ------------------------------------------------------------------------------
-# fname = "C1-2-8.txt"
-fname = "R2-3-12.txt"
+fname = "C1-2-8.txt"
+# fname = "C1-3-10.txt"
+# fname = "C1-3-12.txt"
+# fname = "C2-2-8.txt"
+
+# fname = "C2-3-10.txt"
+
+# fname = "C2-3-12.txt"
+# fname = "R1-2-8.txt"
+# fname = "R1-3-10.txt"
+# fname = "R1-3-12.txt"
+# fname = "R2-2-8.txt"
+# fname = "R2-3-10.txt"
+# fname = "R2-3-12.txt"
 # ifeasible R1-2-8,
 #fname  = "instanceNantes.txt"
 Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout = loadData(fname)
@@ -19,7 +33,9 @@ ip, Xb, Xs, ws, wbi, wbo, u = setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js
 println("The optimization problem to be solved is:")
 print(ip)
 println("Solving...");
+tic()
 status = solve(ip)
+tps = toc()
 # Displaying the results
 if status == :Optimal
   #println("status = ", status)
@@ -40,8 +56,8 @@ if status == :Optimal
   println("z  = ", getobjectivevalue(ip))
   # passageXb = nodes[listparcours(xb)]
   # passageXs = nodes[listparcours(xs)]
-  if solverSelected == solverSelectedCPLEX
-      println("Formattage de solution : necessaire avec CPLEX")
+  if solverSelected == solverSelectedCPLEX || solverSelected == solverSelectedCbc
+      println("Formattage de solution : necessaire avec CPLEX et Cbc")
       xs = formaterSol(xs)
       xb = formaterSol(xb)
   end
@@ -67,5 +83,6 @@ if status == :Optimal
   genSol(passageXs,fname,1)
   println()
   genSol(passageXb,fname,2)
+  println("Temps de resolution = $tps seconds")
 end
 #
