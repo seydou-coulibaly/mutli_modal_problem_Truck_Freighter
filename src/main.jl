@@ -8,7 +8,7 @@ solverSelectedGLPK = GLPKSolverMIP()
 solverSelectedCPLEX = CplexSolver()
 solverSelectedCbc = CbcSolver()
 solverSelectedGurobi = GurobiSolver()
-solverSelected = solverSelectedGLPK
+solverSelected = solverSelectedCPLEX
 # ------------------------------------------------------------------------------
 #                     MAIN
 # ------------------------------------------------------------------------------
