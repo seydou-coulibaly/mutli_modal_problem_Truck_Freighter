@@ -8,26 +8,13 @@ solverSelectedGLPK = GLPKSolverMIP()
 solverSelectedCPLEX = CplexSolver()
 solverSelectedCbc = CbcSolver()
 solverSelectedGurobi = GurobiSolver()
-solverSelected = solverSelectedGurobi
+solverSelected = solverSelectedGLPK
 # ------------------------------------------------------------------------------
 #                     MAIN
 # ------------------------------------------------------------------------------
-fname = "C1-2-8.txt"
-# fname = "C1-3-10.txt"
-# fname = "C1-3-12.txt"
-# fname = "C2-2-8.txt"
-
-# fname = "C2-3-10.txt"
-
-# fname = "C2-3-12.txt"
-# fname = "R1-2-8.txt"
-# fname = "R1-3-10.txt"
-# fname = "R1-3-12.txt"
-# fname = "R2-2-8.txt"
-# fname = "R2-3-10.txt"
-# fname = "R2-3-12.txt"
-# ifeasible R1-2-8,
-#fname  = "instanceNantes.txt"
+instances = ["C1-2-8.txt" "C1-3-10.txt" "C1-3-12.txt" "C2-2-8.txt" "C2-3-10.txt" "C2-3-12.txt" "R1-2-8.txt" "R1-3-10.txt" "R1-3-12.txt" "R2-2-8.txt" "R2-3-10.txt" "R2-3-12.txt" "instanceNantes.txt"]
+# Numero d'instance à executer
+fname = instances[1]
 Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout = loadData(fname)
 ip, Xb, Xs, ws, wbi, wbo, u = setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
 println("The optimization problem to be solved is:")
@@ -83,6 +70,5 @@ if status == :Optimal
   genSol(passageXs,fname,1)
   println()
   genSol(passageXb,fname,2)
-  println("Temps de resolution = $tps seconds")
+  println("\nTemps de resolution = $tps seconds")
 end
-#
