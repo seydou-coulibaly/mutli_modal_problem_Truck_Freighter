@@ -15,8 +15,9 @@ solverSelected = solverSelectedCPLEX
 instances = ["C1-2-8.txt" "C1-3-10.txt" "C1-3-12.txt" "C2-2-8.txt" "C2-3-10.txt" "C2-3-12.txt" "R1-2-8.txt" "R1-3-10.txt" "R1-3-12.txt" "R2-2-8.txt" "R2-3-10.txt" "R2-3-12.txt" "instanceNantes.txt"]
 # Numero d'instance à executer
 fname = instances[1]
+obj = Float64[]
 Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout = loadData(fname)
-ip, Xb, Xs, ws, wbi, wbo, u = setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
+ip, Xb, Xs, ws, wbi, wbo, u = setmodel(Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
 println("The optimization problem to be solved is:")
 print(ip)
 println("Solving...");
@@ -71,4 +72,5 @@ if status == :Optimal
   println()
   genSol(passageXb,fname,2)
   println("\nTemps de resolution = $tps seconds")
+  push!(obj,getobjectivevalue(ip))
 end

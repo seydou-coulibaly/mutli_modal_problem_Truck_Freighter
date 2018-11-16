@@ -1,5 +1,5 @@
 # =========================================================================== #
-function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
+function setmodel(Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitude,longitude,q,a,cout)
     n = length(V)
     m = length(P)
     ip = Model(solver=solverSelected)
@@ -19,6 +19,9 @@ function setmodel(solverSelected,Q,alpha,T,width,s,V,P,J,Js,Jl,Jls,nodes,latitud
     @constraint(ip,[i in Jls], sum(Xs[i,j] for j in V) + sum(Xb[i,j] for j in V) == 1)
     @constraint(ip,[i in Js], sum(Xs[i,j] for j in V) == 1)
     @constraint(ip,[i in Jl], sum(Xb[i,j] for j in V) == 1)
+    # Our hypothesis
+    @constraint(ip,[i in P], sum(Xs[i,j] for j in V) <= 1)
+
     @constraint(ip,[i in V], Xb[i,i] == 0)
     @constraint(ip,[i in V], Xs[i,i] == 0)
     @constraint(ip,[i in V, j in V], Xs[i,j] + Xb[i,j] <= 1)
