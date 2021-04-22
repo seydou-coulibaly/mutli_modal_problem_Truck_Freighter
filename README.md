@@ -33,4 +33,4 @@ vehicles capacity are respected, and traveling costs are minimized.
 ## [Report](./rapport.pdf)
 
 ## Kind of solution proposed after optimization
-![solution's visualisation](img/instance_r1_3_10.png)
+![solution's visualisation](./instance_r1_3_10.png)
